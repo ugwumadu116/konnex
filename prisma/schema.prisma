@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  users     User[]
+  contacts  Contact[]
+  companies Company[]
+  deals     Deal[]
+  stages    PipelineStage[]
+  activities Activity[]
+}
+
+model User {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  password    String
+  name        String
+  role        String    @default("member") // admin | member
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  contacts    Contact[] @relation("CreatedByUser")
+  companies   Company[] @relation("CompanyCreatedBy")
+  deals       Deal[]    @relation("DealCreatedBy")
+  activities  Activity[] @relation("ActivityCreatedBy")
+}
+
+model Contact {
+  id          String    @id @default(cuid())
+  firstName   String
+  lastName    String    @default("")
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  country     String?
+  notes       String?
+  company     Company?  @relation(fields: [companyId], references: [id])
+  companyId   String?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdBy   User      @relation("CreatedByUser", fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deals       Deal[]
+  activities  Activity[]
+
+  @@index([workspaceId])
+}
+
+model Company {
+  id          String    @id @default(cuid())
+  name        String
+  industry    String?
+  website     String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  country     String?
+  notes       String?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdBy   User      @relation("CompanyCreatedBy", fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  contacts    Contact[]
+  deals       Deal[]
+  activities  Activity[]
+
+  @@index([workspaceId])
+}
+
+model PipelineStage {
+  id          String    @id @default(cuid())
+  name        String
+  order       Int
+  color       String    @default("#3B82F6")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  deals       Deal[]
+
+  @@index([workspaceId])
+}
+
+model Deal {
+  id          String         @id @default(cuid())
+  title       String
+  value       Float          @default(0)
+  currency    String         @default("USD")
+  stage       PipelineStage  @relation(fields: [stageId], references: [id])
+  stageId     String
+  contact     Contact?       @relation(fields: [contactId], references: [id])
+  contactId   String?
+  company     Company?       @relation(fields: [companyId], references: [id])
+  companyId   String?
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdBy   User           @relation("DealCreatedBy", fields: [createdById], references: [id])
+  createdById String
+  closedAt    DateTime?
+  wonAt       DateTime?
+  lostAt      DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  activities  Activity[]
+
+  @@index([workspaceId])
+  @@index([stageId])
+}
+
+model Activity {
+  id          String    @id @default(cuid())
+  type        String    // CALL | EMAIL | MEETING | NOTE | TASK
+  title       String
+  description String?
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  contactId   String?
+  company     Company?  @relation(fields: [companyId], references: [id])
+  companyId   String?
+  deal        Deal?     @relation(fields: [dealId], references: [id])
+  dealId      String?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdBy   User      @relation("ActivityCreatedBy", fields: [createdById], references: [id])
+  createdById String
+  dueAt       DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId])
+  @@index([contactId])
+  @@index([dealId])
+}
