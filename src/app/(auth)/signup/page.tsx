@@ -60,11 +60,11 @@ export default function SignupPage() {
             )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Joel Ugwumadu" required />
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="John Doe" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Company / Workspace Name</label>
-              <Input value={form.workspaceName} onChange={(e) => setForm({ ...form, workspaceName: e.target.value })} placeholder="RivrAfrica" required />
+              <Input value={form.workspaceName} onChange={(e) => setForm({ ...form, workspaceName: e.target.value })} placeholder="Acme Inc." required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
